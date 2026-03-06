@@ -5,9 +5,37 @@ import requests
 import joblib
 import mysql.connector
 import os
+import gdown
 from dotenv import load_dotenv
 
 load_dotenv()
+
+os.makedirs("static/data", exist_ok=True)
+
+JOB_MODEL_PATH = "static/data/job.pkl"
+INTERN_MODEL_PATH = "static/data/internship.pkl"
+VECTORIZER_PATH = "static/data/vectorizer.pkl"
+
+JOB_MODEL_URL = "https://drive.google.com/file/d/1x2ZBFyPJobnanLdvLvSwYxU45aqm_vHx/view?usp=drive_link"
+INTERN_MODEL_URL = "https://drive.google.com/file/d/1s-P0ilyUrMfVuOmggWAz4LSeYVcslKJK/view?usp=drive_link"
+VECTORIZER_URL = "https://drive.google.com/file/d/1rYYSQUyCwIh8vqNIfHsaHXwSFc5_AFnY/view?usp=drive_link"
+
+
+def download_models():
+    if not os.path.exists(JOB_MODEL_PATH):
+        print("Downloading job model...")
+        gdown.download(JOB_MODEL_URL, JOB_MODEL_PATH, quiet=False)
+
+    if not os.path.exists(INTERN_MODEL_PATH):
+        print("Downloading internship model...")
+        gdown.download(INTERN_MODEL_URL, INTERN_MODEL_PATH, quiet=False)
+
+    if not os.path.exists(VECTORIZER_PATH):
+        print("Downloading vectorizer...")
+        gdown.download(VECTORIZER_URL, VECTORIZER_PATH, quiet=False)
+
+
+download_models()
 
 STUD_DETAIL_LINK = "https://results.bput.ac.in/student-detsils-results?rollNo=%s"
 
