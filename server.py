@@ -16,23 +16,23 @@ JOB_MODEL_PATH = "static/data/job.pkl"
 INTERN_MODEL_PATH = "static/data/internship.pkl"
 VECTORIZER_PATH = "static/data/vectorizer.pkl"
 
-JOB_MODEL_URL = "https://drive.google.com/file/d/1x2ZBFyPJobnanLdvLvSwYxU45aqm_vHx/view?usp=drive_link"
-INTERN_MODEL_URL = "https://drive.google.com/file/d/1s-P0ilyUrMfVuOmggWAz4LSeYVcslKJK/view?usp=drive_link"
-VECTORIZER_URL = "https://drive.google.com/file/d/1rYYSQUyCwIh8vqNIfHsaHXwSFc5_AFnY/view?usp=drive_link"
+job_url = "https://drive.google.com/uc?id=1x2ZBFyPJobnanLdvLvSwYxU45aqm_vHx"
+intern_url = "https://drive.google.com/uc?id=1s-P0ilyUrMfVuOmggWAz4LSeYVcslKJK"
+vectorizer_url = "https://drive.google.com/uc?id=1rYYSQUyCwIh8vqNIfHsaHXwSFc5_AFnY"
 
 
 def download_models():
     if not os.path.exists(JOB_MODEL_PATH):
         print("Downloading job model...")
-        gdown.download(JOB_MODEL_URL, JOB_MODEL_PATH, quiet=False)
+        gdown.download(job_url, JOB_MODEL_PATH, quiet=False)
 
     if not os.path.exists(INTERN_MODEL_PATH):
         print("Downloading internship model...")
-        gdown.download(INTERN_MODEL_URL, INTERN_MODEL_PATH, quiet=False)
+        gdown.download(intern_url, INTERN_MODEL_PATH, quiet=False)
 
     if not os.path.exists(VECTORIZER_PATH):
         print("Downloading vectorizer...")
-        gdown.download(VECTORIZER_URL, VECTORIZER_PATH, quiet=False)
+        gdown.download(vectorizer_url, VECTORIZER_PATH, quiet=False)
 
 
 download_models()
