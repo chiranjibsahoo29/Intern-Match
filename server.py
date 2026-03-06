@@ -11,8 +11,8 @@ load_dotenv()
 
 STUD_DETAIL_LINK = "https://results.bput.ac.in/student-detsils-results?rollNo=%s"
 
-db = mysql.connector.connect(host="localhost",user=os.getenv("DB_USER"),password=os.getenv("DB_PASS"),database="HACKATHON")
-cursor = db.cursor()
+# db = mysql.connector.connect(host="localhost",user=os.getenv("DB_USER"),password=os.getenv("DB_PASS"),database="HACKATHON")
+# cursor = db.cursor()
 
 job_model = joblib.load("static/data/job.pkl")
 intern_model = joblib.load("static/data/internship.pkl")
