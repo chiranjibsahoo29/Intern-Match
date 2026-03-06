@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Dashboard</title>
+  <link rel="stylesheet" href="static/css/profile.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="static/imgs/navigation-image.JPG" alt="InternMatch" width="200" height="40">
+            </a>
+        <ul>
+                <li>
+                    <a href="" id="profileLink" class="profile-icon" title="View Profile" aria-label="View Profile">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 20 20">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                        </svg>
+                    </a>
+                </li>
+                <li><a href="/">Home</a></li>
+                <li><a href="" id="dashboardLink">Dashboard</a></li>
+                <li class="has-dropdown">
+                    <a>Service</a>
+                    <ul>
+                        <li><a href="" id="jobLink">Find Your Job</a></li>
+                        <li><a href="" id="internshipLink">Find Your Internship</a></li>
+                    </ul>            
+                </li>    
+            <li><a href="" id="subscriptionLink">Subscription</a></li>
+            <li><a href="/about">About Us</a></li>
+        </ul>
+      </div>
+    </nav>
+  <div class="dashboard-container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-menu">
+        <!-- Optional: Add menu items here -->
+      </div>
+
+      <!-- Sign Out Button -->
+      <div class="signout-container">
+        <button class="signout-btn" onclick="signOut()">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="header">
+        <h1>My Profile</h1>
+      </div>
+
+      <!-- Profile Information -->
+      <div class="content-area">
+        <h2>Student Information</h2>
+        <div id="userInfo">
+          <p style="color: gray;">Fetching your details...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="static/js/profile.js"></script>
+  <script src="static/js/common.js"></script>
+</body>
+</html>

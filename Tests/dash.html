@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InternMatch | Placement Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }   
+    header {
+      background: #2e7d32;
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 20px;
+    }
+    .cards {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .card {
+      flex: 1;
+      min-width: 180px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      text-align: center;
+    }
+    .card h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #333;
+    }
+    .card p {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    .charts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .chart-box {
+      flex: 1;
+      min-width: 300px;
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .table-section {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+    }
+    .scroll-area {
+      max-height: 300px;
+      overflow-y: auto;
+      border-top: 1px solid #ddd;
+      margin-top: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+    th {
+      background: #f1f1f1;
+    }
+    .elide-text {
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>University Placement Dashboard</header>
+
+  <div class="container">
+    <div class="cards">
+      <div class="card"><h3>Total Students</h3><p id="total_students">0</p></div>
+      <div class="card"><h3>Total Branches</h3><p id="total_branches">0</p></div>
+      <div class="card"><h3>Total Colleges</h3><p id="total_colleges">0</p></div>
+      <div class="card"><h3>Total Courses</h3><p id="total_courses">0</p></div>
+    </div>
+
+    <div class="charts">
+      <div class="chart-box">
+        <canvas id="branchPie"></canvas>
+      </div>
+    </div>
+
+    <div class="table-section">
+      <h3>Students</h3>
+      <div class="scroll-area" id="scrollArea">
+        <table id="studentTable">
+          <thead>
+            <tr>
+              <th>SL No</th>
+              <th>Regd</th>
+              <th>Name</th>
+              <th>Batch</th>
+              <th>Branch</th>
+              <th>Course</th>
+              <th>College</th>
+            </tr>
+          </thead>
+          <tbody id="studentBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let branchChart;
+    let isLoading = false;
+
+    async function loadDashboard() {
+      try {
+        const response = await fetch("/analytics");
+        const data = await response.json();
+
+        
+        document.getElementById("total_students").innerText = data.total_students || 0;
+        document.getElementById("total_branches").innerText = data.total_branches || 0;
+        document.getElementById("total_colleges").innerText = data.total_colleges || 0;
+        document.getElementById("total_courses").innerText = data.total_courses || 0;
+
+        
+        const branchData = data.branch || [];
+        const labels = branchData.map(x => x.BRANCH || x.branch || "Unknown");
+        const counts = branchData.map(x => x.count || 0);
+
+        if (branchChart) branchChart.destroy();
+
+        branchChart = new Chart(document.getElementById("branchPie"), {
+          type: "pie",
+          data: {
+            labels,
+            datasets: [{
+              data: counts,
+              backgroundColor: ["#4CAF50", "#42A5F5", "#FFB74D", "#E57373", "#BA68C8"],
+            }]
+          },
+          options: {
+            plugins: {
+              legend: { position: "bottom" },
+              tooltip: {
+                callbacks: {
+                  label: ctx => `${ctx.label}: ${ctx.formattedValue}`
+                }
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Dashboard load failed:", err);
+      }
+    }
+
+    async function loadStudents() {
+      if (isLoading) return;
+      isLoading = true;
+
+      try {
+        const res = await fetch("/students");
+        const students = await res.json();
+        const tbody = document.getElementById("studentBody");
+
+        students.forEach((s, i) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${s.SL_NO || ""}</td>
+            <td>${s.REGD || ""}</td>
+            <td class="elide-text" title="${s.NAME || ""}">${s.NAME || ""}</td>
+            <td>${s.BATCH || ""}</td>
+            <td class="elide-text" title="${s.BRANCH || ""}">${s.BRANCH || ""}</td>
+            <td>${s.COURSE || ""}</td>
+            <td class="elide-text" title="${s.COLLEGE || ""}">${s.COLLEGE || ""}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error("Error loading students:", err);
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    
+    document.getElementById("scrollArea").addEventListener("scroll", (e) => {
+      const area = e.target;
+      if (area.scrollTop + area.clientHeight >= area.scrollHeight - 10) {
+        loadStudents();
+      }
+    });
+
+    
+    loadDashboard();
+    loadStudents();
+    setInterval(loadDashboard, 5000);
+  </script>
+</body>
+</html>
+

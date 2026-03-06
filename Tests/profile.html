@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Dashboard</title>
+  <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+  <div class="dashboard-container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-menu">
+        <!-- Optional: Add menu items here -->
+      </div>
+
+      <!-- Sign Out Button -->
+      <div class="signout-container">
+        <button class="signout-btn" onclick="signOut()">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="header">
+        <h1>My Profile</h1>
+      </div>
+
+      <!-- Profile Information -->
+      <div class="content-area">
+        <h2>Student Information</h2>
+        <div id="userInfo">
+          <p style="color: gray;">Fetching your details...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="profile.js"></script>
+</body>
+</html>

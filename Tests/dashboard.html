@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>InternMatch | Placement Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f6fffa;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { color: #00b894; text-align: center; }
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      width: 200px;
+      text-align: center;
+    }
+    .charts {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin: 30px 0;
+    }
+    canvas {
+      width: 100% !important;
+      height: 300px !important;
+      max-width: 600px;
+      display: block;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      background: white;
+      border-collapse: collapse;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 30px;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #00b894;
+      color: white;
+    }
+    input, select {
+      padding: 6px 10px;
+      margin: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎓 InternMatch | University Placement Dashboard</h1>
+
+  <div class="stats">
+    <div class="card">
+      <h2 id="total">0</h2>
+      <p>Total Students</p>
+    </div>
+  </div>
+
+  <div class="charts">
+    <canvas id="branchChart"></canvas>
+    <canvas id="batchChart"></canvas>
+    <canvas id="courseChart"></canvas>
+    <canvas id="collegeChart"></canvas>
+  </div>
+
+  <h2>Student List</h2>
+
+  <div style="margin-bottom:10px;">
+    <select id="filterBranch">
+      <option value="">All Branches</option>
+    </select>
+    <select id="filterBatch">
+      <option value="">All Batches</option>
+    </select>
+    <input type="text" id="searchName" placeholder="Search by name...">
+  </div>
+
+  <table id="studentsTable">
+    <thead>
+      <tr>
+        <th>SL No</th>
+        <th>Regd</th>
+        <th>Name</th>
+        <th>Batch</th>
+        <th>Branch</th>
+        <th>Course</th>
+        <th>College</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let allStudents = [];
+    let branchChart, batchChart, courseChart, collegeChart;
+
+    async function loadDashboard() {
+      console.log("🔄 Refreshing dashboard...");
+
+      
+      let data = {};
+      try {
+        const res = await fetch("http://localhost:5000/api/analytics");
+        data = await res.json();
+        if (!data || !data.branch) throw new Error("Invalid response");
+      } catch (err) {
+        console.error("⚠️ Error loading analytics:", err);
+        document.body.innerHTML = "<h2 style='color:red;text-align:center;'>⚠️ Dashboard data failed to load. Check backend API.</h2>";
+        return;
+      }
+
+      document.getElementById("total").innerText = data.total_students || 0;
+
+      
+      if (branchChart) branchChart.destroy();
+      if (batchChart) batchChart.destroy();
+      if (courseChart) courseChart.destroy();
+      if (collegeChart) collegeChart.destroy();
+
+      
+      branchChart = new Chart(document.getElementById("branchChart"), {
+        type: "bar",
+        data: {
+          labels: data.branch.map(x => x.BRANCH || x.branch),
+          datasets: [{
+            label: "Branch-wise Students",
+            data: data.branch.map(x => x.count),
+            backgroundColor: "#00b894"
+          }]
+        }
+      });
+
+      
+      batchChart = new Chart(document.getElementById("batchChart"), {
+        type: "line",
+        data: {
+          labels: data.batch.map(x => x.BATCH || x.batch),
+          datasets: [{
+            label: "Batch-wise Students",
+            data: data.batch.map(x => x.count),
+            borderColor: "#0984e3",
+            fill: false
+          }]
+        }
+      });
+
+      
+      courseChart = new Chart(document.getElementById("courseChart"), {
+        type: "pie",
+        data: {
+          labels: data.course.map(x => x.COURSE || x.course),
+          datasets: [{
+            data: data.course.map(x => x.count),
+            backgroundColor: ["#00b894", "#ff7675", "#74b9ff", "#ffeaa7"]
+          }]
+        }
+      });
+
+      
+      collegeChart = new Chart(document.getElementById("collegeChart"), {
+        type: "bar",
+        data: {
+          labels: data.college.map(x => x.COLLEGE || x.college),
+          datasets: [{
+            label: "College-wise Students",
+            data: data.college.map(x => x.count),
+            backgroundColor: "#fdcb6e"
+          }]
+        },
+        options: { indexAxis: 'y' }
+      });
+
+      
+      try {
+        const studentsRes = await fetch("http://localhost:5000/api/students");
+        allStudents = await studentsRes.json();
+        populateTable(allStudents);
+        populateFilters(allStudents);
+      } catch (err) {
+        console.error("⚠️ Failed to load students:", err);
+      }
+    }
+
+    
+    function populateTable(data) {
+      const tbody = document.querySelector("#studentsTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(st => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${st.SL_NO}</td>
+          <td>${st.REGD}</td>
+          <td>${st.NAME}</td>
+          <td>${st.BATCH}</td>
+          <td>${st.BRANCH}</td>
+          <td>${st.COURSE}</td>
+          <td>${st.COLLEGE}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    
+    function populateFilters(data) {
+      const branches = [...new Set(data.map(d => d.BRANCH))];
+      const batches = [...new Set(data.map(d => d.BATCH))];
+      const branchSel = document.getElementById("filterBranch");
+      const batchSel = document.getElementById("filterBatch");
+      branchSel.innerHTML = "<option value=''>All Branches</option>";
+      batchSel.innerHTML = "<option value=''>All Batches</option>";
+      branches.forEach(b => branchSel.innerHTML += <option>${b}</option>);
+      batches.forEach(b => batchSel.innerHTML += <option>${b}</option>);
+    }
+
+    
+    document.getElementById("filterBranch").addEventListener("change", applyFilters);
+    document.getElementById("filterBatch").addEventListener("change", applyFilters);
+    document.getElementById("searchName").addEventListener("input", applyFilters);
+
+    function applyFilters() {
+      const branch = document.getElementById("filterBranch").value;
+      const batch = document.getElementById("filterBatch").value;
+      const search = document.getElementById("searchName").value.toLowerCase();
+      const filtered = allStudents.filter(s =>
+        (!branch || s.BRANCH === branch) &&
+        (!batch || s.BATCH === batch) &&
+        (!search || s.NAME.toLowerCase().includes(search))
+      );
+      populateTable(filtered);
+    }
+
+    
+    loadDashboard();
+    setInterval(loadDashboard, 5000);
+  </script>
+</body>
+</html>
