@@ -57,7 +57,7 @@ Intern-Match/
 
 
 ⚙️ Installation
-git clone https://github.com/your-username/Intern-Match.git
+git clone (https://github.com/chiranjibsahoo29/Intern-Match.git)
 cd Intern-Match
 pip install -r requirements.txt
 python server.py
